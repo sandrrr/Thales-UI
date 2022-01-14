@@ -7,17 +7,17 @@ export default function Program() {
 	const PAGE_SIZE = 10;
 
     const program = useSelector(store => store.program);
+    let items = useSelector(store => store.data[program]);
 
 	const [page, setPage] = useState(0);
 	const [filteringText, setFilteringText] = useState('');
-	const [dateFrom, setDateFrom] = useState(moment().format('YYWW'));
-	const [dateTo, setDateTo] = useState(dateFrom);
+	const [date, setDate] = useState(moment().format('YYWW'));
 
 	if (program === undefined) {
-		return null;
+		return <p style={{textAlign: 'center'}}>Please select a program</p>;
 	}
 
-	function setDate(value, isFrom) {
+	function formatDate(value) {
 		value = parseInt(value);
 		let year = Math.floor(value / 100);
 		let week = value % 100;
@@ -32,100 +32,66 @@ export default function Program() {
 
 		value = year * 100 + week;
 		if (!moment(value, "YYWW").isValid()) return;
-		if (isFrom || value < dateFrom) {
-			setDateFrom(value);
-		}
-		if (!isFrom || value > dateTo) {
-			setDateTo(value);
-		}
+		setDate(value);
 	}
 
-	const items = [
+	//TODO: after removing, change items from let to const
+	items = [
 		{
-			label: 'ETQ',
-			name: 'Item 16',
-			estimatedDate: '2054'
+			info: {
+				type: 'EQT',
+				designation: 8
+			},
+			estimations: [{estimation: 1710}]
 		},
 		{
-			label: 'ETQ',
-			name: 'Item 24',
-			estimatedDate: '2086'
+			info: {
+				type: 'SOUS-EQT',
+				designation: 14
+			},
+			estimations: [{estimation: 1712}]
 		},
 		{
-			label: 'ETQ',
-			name: 'Item 52',
-			estimatedDate: '2093'
+			info: {
+				type: 'EQT',
+				designation: 38
+			},
+			estimations: [{estimation: 1704}]
 		},
 		{
-			label: 'ETQ',
-			name: 'Item 16',
-			estimatedDate: '2054'
+			info: {
+				type: 'SOUS-EQT',
+				designation: 40
+			},
+			estimations: [{estimation: 1709}]
 		},
 		{
-			label: 'ETQ',
-			name: 'Item 24',
-			estimatedDate: '2086'
-		},
-		{
-			label: 'ETQ',
-			name: 'Item 52',
-			estimatedDate: '2093'
-		},
-		{
-			label: 'ETQ',
-			name: 'Item 16',
-			estimatedDate: '2054'
-		},
-		{
-			label: 'ETQ',
-			name: 'Item 24',
-			estimatedDate: '2086'
-		},
-		{
-			label: 'ETQ',
-			name: 'Item 52',
-			estimatedDate: '2093'
-		},
-		{
-			label: 'ETQ',
-			name: 'Item 16',
-			estimatedDate: '2054'
-		},
-		{
-			label: 'ETQ',
-			name: 'Item 24',
-			estimatedDate: '2086'
-		},
-		{
-			label: 'ETQ',
-			name: 'Item 52',
-			estimatedDate: '2093'
+			info: {
+				type: 'SOUS-EQT',
+				designation: 42
+			},
+			estimations: [{estimation: 1730}]
 		}
-	].filter(
-		item => filteringText === '' || 
-		item.label.includes(filteringText) || 
-		item.name.includes(filteringText) ||
-		item.estimatedDate.includes(filteringText)
-	);
+	]
 
     return (
         <Table
 			variant='full-page'
 			columnDefinitions={[
 				{
-					id: 'label',
-					header: 'Étiquette',
-					cell: item => item.label
+					id: 'type',
+					header: 'Type',
+					cell: item => <span style={{marginLeft: item.info.type !== 'EQT' ? 20 : 0}}>{item.info.type}</span>
 				},
 				{
-					id: 'name',
-					header: 'Élément',
-					cell: item => item.name
+					id: 'designation',
+					header: 'Designation',
+					cell: item => 'Item ' + item.info.designation
 				},
 				{
 					id: 'estimatedDate',
-					header: 'Date estimée',
-					cell: item => item.estimatedDate
+					header: 'Predicted date',
+					cell: item => item.estimations[0]?.estimation ?? <span style={{opacity: .5}}>No prediction</span>
 				}
 			]}
 			items={items.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE)}
@@ -134,22 +100,14 @@ export default function Program() {
 				<Header
 					counter={"(" + items.length + ")"}
 					actions={
-						<div style={{display: 'flex', alignItems: 'center'}}>
-							<Input
-								type='number'
-								value={dateFrom}
-								onChange={event => setDate(event.detail.value, true)}
-							/>
-							<span style={{margin: 10}}>à</span>
-							<Input
-								type='number'
-								value={dateTo}
-								onChange={event => setDate(event.detail.value, false)}
-							/>
-						</div>
+						<Input
+							type='number'
+							value={date}
+							onChange={event => formatDate(event.detail.value)}
+						/>
 					}
 				>
-					{program}
+					Prog {program}
 				</Header>
 			}
 			pagination={
